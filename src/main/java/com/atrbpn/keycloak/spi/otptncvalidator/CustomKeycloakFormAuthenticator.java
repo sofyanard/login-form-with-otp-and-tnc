@@ -2,6 +2,11 @@ package com.atrbpn.keycloak.spi.otptncvalidator;
 
 import com.atrbpn.keycloak.spi.otptncvalidator.helper.DBHelper;
 import com.atrbpn.keycloak.spi.otptncvalidator.helper.PostgresDBHelper;
+import com.atrbpn.keycloak.spi.otptncvalidator.tnc.TncRequest;
+import com.atrbpn.keycloak.spi.otptncvalidator.tnc.TncResponse;
+import com.atrbpn.keycloak.spi.otptncvalidator.tnc.TncRestClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.events.Details;
@@ -74,7 +79,7 @@ public class CustomKeycloakFormAuthenticator implements Authenticator {
             "AND KANTORID = ? \n" +
             "ORDER by ROLENAME";
     
-    private static final String TPL_TNC = "tnc.ftl";
+    private static final String TNC_USER_ATTRIBUTE_KEY = "tnc";
 
     private static String smtpHost;
     private static String smtpFrom;
@@ -221,19 +226,11 @@ public class CustomKeycloakFormAuthenticator implements Authenticator {
             authenticationFlowContext.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
         }
 
-        if(new Random().nextBoolean()) {
-            log.info(" displaying TNC for username : {} ", username);
-            authenticationFlowContext.forceChallenge(
-                    authenticationFlowContext.form().setAttribute("realm", authenticationFlowContext.getRealm())
-                            .setInfo("Please Agree with Our Terms and Conditions").createForm(TPL_TNC)
-            );
-        } else {
-            // all validation success
-            log.info(" succesfully login for username : {} ", username);
+        // all validation success
+        log.info(" succesfully login for username : {} ", username);
 
-            authenticationFlowContext.setUser(userModel);
-            authenticationFlowContext.success();
-        }
+        authenticationFlowContext.setUser(userModel);
+        authenticationFlowContext.success();
 
         // check whether current IP is equals to previous IP
         /*
@@ -285,6 +282,35 @@ public class CustomKeycloakFormAuthenticator implements Authenticator {
                     thread.start();
                 }
             }
+        }
+
+        // Update TnC to external API
+        if (TncRestClient.tncApiBaseUrl != null && !TncRestClient.tncApiBaseUrl.trim().isEmpty()) {
+            TncRequest tncRequest = new TncRequest(userModel.getAttributes().get("orcluserid").get(0), "internal");
+
+            // Thread thread = new Thread() {
+            //     public void run() {
+                    try {
+                        TncResponse tncResponse = TncRestClient.updateUser(tncRequest);
+                        log.info("TNC API response: {}", new ObjectMapper().writeValueAsString(tncResponse));
+                        
+                        // Update user attribute tnc
+                        if (tncResponse != null 
+                                && tncResponse.getData() != null 
+                                && !tncResponse.getData().isEmpty() 
+                                && tncResponse.getData().get(0) != null 
+                                && tncResponse.getData().get(0).getTnc() != null 
+                                && !tncResponse.getData().get(0).getTnc().isEmpty()) {
+                            String tncUserAttribute = tncResponse.getData().get(0).getTnc();
+                            log.info("Updating TnC User Attribute: {}", tncUserAttribute);
+                            userModel.setSingleAttribute(TNC_USER_ATTRIBUTE_KEY, tncUserAttribute);
+                        }
+                    } catch (Exception ex) {
+                        log.error(ex.getMessage(), ex);
+                    }
+            //     }
+            // };
+            // thread.start();
         }
     }
 
