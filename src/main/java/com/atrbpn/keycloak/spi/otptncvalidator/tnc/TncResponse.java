@@ -40,8 +40,11 @@ public class TncResponse {
         @JsonProperty("VERSI_TNC_TERBARU")
         private String versiTncTerbaru;
 
-        @JsonProperty("KONTEN_TEXT")
-        private String kontenText;
+        @JsonProperty("TANGGALTNC")
+        private String tanggaltnc;
+
+        @JsonProperty("KONTEN")
+        private String konten;
 
         @JsonProperty("URL")
         private String url;
@@ -57,7 +60,8 @@ public class TncResponse {
         public String getVersiTncUser() { return versiTncUser; }
         public String getTncTerbaruId() { return tncTerbaruId; }
         public String getVersiTncTerbaru() { return versiTncTerbaru; }
-        public String getKontenText() { return kontenText; }
+        public String getTanggaltnc() { return tanggaltnc; }
+        public String getKonten() { return konten; }
         public String getUrl() { return url; }
         public int getStatusTnc() { return statusTnc; }
     }
