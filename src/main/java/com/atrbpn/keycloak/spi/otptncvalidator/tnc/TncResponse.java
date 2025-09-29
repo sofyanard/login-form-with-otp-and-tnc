@@ -1,7 +1,5 @@
 package com.atrbpn.keycloak.spi.otptncvalidator.tnc;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TncResponse {
@@ -13,7 +11,7 @@ public class TncResponse {
     private String message;
 
     @JsonProperty("data")
-    private List<TncResponseData> listTncResponseData;
+    private TncResponseData tncResponseData;
 
     // Getters and Setters
 
@@ -68,6 +66,6 @@ public class TncResponse {
 
     public boolean isSuccess() { return success; }
     public String getMessage() { return message; }
-    public List<TncResponseData> getData() { return listTncResponseData; }
+    public TncResponseData getData() { return tncResponseData; }
 
 }

@@ -306,32 +306,32 @@ public class CustomKeycloakFormAuthenticator implements Authenticator {
 
                 TncRequest tncRequest = new TncRequest(userModel.getAttributes().get("orcluserid").get(0), "internal");
 
-            Thread thread = new Thread() {
-                public void run() {
-                    try {
-                        log.info("Calling UpdateUser API");
-                        TncResponse tncResponse = TncRestClient.updateUser(tncRequest);
-                        log.info("TNC API response: {}", new ObjectMapper().writeValueAsString(tncResponse));
-                        
-                        // Update user attribute tnc
-                        /*
-                        if (tncResponse != null 
-                                && tncResponse.getData() != null 
-                                && !tncResponse.getData().isEmpty() 
-                                && tncResponse.getData().get(0) != null 
-                                && tncResponse.getData().get(0).getTncTerbaruId() != null 
-                                && !tncResponse.getData().get(0).getTncTerbaruId().isEmpty()) {
-                            String tncUserAttribute = tncResponse.getData().get(0).getTncTerbaruId();
-                            log.info("Updating TnC User Attribute: {}", tncUserAttribute);
-                            userModel.setSingleAttribute(TNC_USER_ATTRIBUTE_KEY, tncUserAttribute);
+                Thread thread = new Thread() {
+                    public void run() {
+                        try {
+                            log.info("Calling UpdateUser API");
+                            TncResponse tncResponse = TncRestClient.updateUser(tncRequest);
+                            log.info("TNC API response: {}", new ObjectMapper().writeValueAsString(tncResponse));
+                            
+                            // Update user attribute tnc
+                            /*
+                            if (tncResponse != null 
+                                    && tncResponse.getData() != null 
+                                    && !tncResponse.getData().isEmpty() 
+                                    && tncResponse.getData().get(0) != null 
+                                    && tncResponse.getData().get(0).getTncTerbaruId() != null 
+                                    && !tncResponse.getData().get(0).getTncTerbaruId().isEmpty()) {
+                                String tncUserAttribute = tncResponse.getData().get(0).getTncTerbaruId();
+                                log.info("Updating TnC User Attribute: {}", tncUserAttribute);
+                                userModel.setSingleAttribute(TNC_USER_ATTRIBUTE_KEY, tncUserAttribute);
+                            }
+                            */
+                        } catch (Exception ex) {
+                            log.error(ex.getMessage(), ex);
                         }
-                        */
-                    } catch (Exception ex) {
-                        log.error(ex.getMessage(), ex);
                     }
-                }
-            };
-            thread.start();
+                };
+                thread.start();
 
             }
         }
